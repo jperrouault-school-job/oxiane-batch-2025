@@ -13,6 +13,7 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.IteratorItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -43,12 +44,13 @@ public class IntroBatchConfig {
     }
 
     @Bean
-    ItemWriter<String> stringPrintWriter() {
+    @StepScope
+    ItemWriter<String> stringPrintWriter(@Value("#{jobParameters['prefix']}") String prefix) {
         return items -> {
             System.out.println("--- Nouveau chunk ---");
 
             for (String item : items) {
-                System.out.println(item);
+                System.out.println(prefix + item);
             }
         };
     }

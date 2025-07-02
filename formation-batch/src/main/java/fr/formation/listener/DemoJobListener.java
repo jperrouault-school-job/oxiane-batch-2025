@@ -10,6 +10,9 @@ public class DemoJobListener implements JobExecutionListener {
     @Override
     public void beforeJob(@NonNull JobExecution jobExecution) {
         System.out.println("📥 Avant l'exécution du Job");
+        
+        String prefix = jobExecution.getJobParameters().getString("prefix");
+        System.out.println("Paramètre préfix = " + prefix);
     }
 
     @Override

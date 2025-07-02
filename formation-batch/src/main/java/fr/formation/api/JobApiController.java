@@ -23,6 +23,7 @@ public class JobApiController {
     public void start() throws Exception {
         JobParameters params = new JobParametersBuilder()
             .addLong("time", System.currentTimeMillis())
+            .addString("prefix", "Hello ")
             .toJobParameters()
         ;
 
