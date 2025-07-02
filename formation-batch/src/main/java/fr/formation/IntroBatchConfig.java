@@ -5,13 +5,17 @@ import java.util.List;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.IteratorItemReader;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -60,6 +64,35 @@ public class IntroBatchConfig {
         };
     }
 
+    @Bean
+    Tasklet demoTasklet() {
+        return (stepContribution, chunkContext) -> {
+            System.out.println("Tâche simple pour démonstration.");
+
+            return RepeatStatus.FINISHED;
+        };
+    }
+
+    @Bean
+    Step demoTaskletStep(Tasklet demoTasklet) {
+        return new StepBuilder("demoTaskletStep", jobRepository)
+            .tasklet(demoTasklet, transactionManager)
+            .build()
+        ;
+    }
+
+    @Bean
+    Step demoTaskletStep2() {
+        return new StepBuilder("demoTaskletStep", jobRepository)
+            .tasklet((stepContribution, chunkContext) -> {
+                System.out.println("Tâche simple (2) pour démonstration.");
+
+                return RepeatStatus.FINISHED;
+            }, transactionManager)
+            .build()
+        ;
+    }
+
     @Autowired
     private JobRepository jobRepository;
 
@@ -92,9 +125,21 @@ public class IntroBatchConfig {
     }
 
     @Bean
-    Job stringJob(Step stringStep, DemoJobListener demoJobListener) {
-        return new JobBuilder("stringJob", jobRepository)
+    Flow stringFlow(Step stringStep, Step demoTaskletStep, Step demoTaskletStep2) {
+        return new FlowBuilder<Flow>("stringFlow")
             .start(stringStep)
+                .on("FAILED").to(demoTaskletStep)
+                .from(stringStep).on("*").to(demoTaskletStep2)
+            .build()
+        ;
+    }
+
+    @Bean
+    Job stringJob(Flow stringFlow, DemoJobListener demoJobListener) {
+        return new JobBuilder("stringJob", jobRepository)
+            // .start(stringStep)
+            .start(stringFlow)
+            .end()
             .listener(demoJobListener)
             .validator(new DemoJobValidator())
             .build()
