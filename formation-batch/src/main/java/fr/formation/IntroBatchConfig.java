@@ -14,8 +14,10 @@ import org.springframework.batch.item.support.IteratorItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import fr.formation.listener.DemoJobListener;
+import fr.formation.listener.DemoStepListener;
 
 @Configuration
 public class IntroBatchConfig {
@@ -56,7 +58,7 @@ public class IntroBatchConfig {
     private PlatformTransactionManager transactionManager;
 
     @Bean
-    Step stringStep(ItemReader<String> stringReader, ItemProcessor<String, String> stringUppercaseProcessor, ItemWriter<String> stringPrintWriter) {
+    Step stringStep(ItemReader<String> stringReader, ItemProcessor<String, String> stringUppercaseProcessor, ItemWriter<String> stringPrintWriter, DemoStepListener demoStepListener) {
         return new StepBuilder("stringStep", jobRepository)
             .<String, String>chunk(2, transactionManager)
             .reader(stringReader)
@@ -64,7 +66,7 @@ public class IntroBatchConfig {
             .writer(stringPrintWriter)
 
             // Multi-threading : les chunks vont être dans des threads différents
-            .taskExecutor(new SimpleAsyncTaskExecutor())
+            // .taskExecutor(new SimpleAsyncTaskExecutor())
 
             // Configuration la tolérence aux erreurs
             .faultTolerant()
@@ -74,14 +76,17 @@ public class IntroBatchConfig {
             .skip(RuntimeException.class)
             .skipLimit(1)
 
+            .listener(demoStepListener)
+
             .build()
         ;
     }
 
     @Bean
-    Job stringJob(Step stringStep) {
+    Job stringJob(Step stringStep, DemoJobListener demoJobListener) {
         return new JobBuilder("stringJob", jobRepository)
             .start(stringStep)
+            .listener(demoJobListener)
             .build()
         ;
     }
