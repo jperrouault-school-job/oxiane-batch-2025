@@ -24,6 +24,9 @@ import fr.formation.validator.DemoJobValidator;
 
 @Configuration
 public class IntroBatchConfig {
+    private boolean failure = true;
+
+
     @Bean
     @StepScope
     ItemReader<String> stringReader() {
@@ -36,7 +39,8 @@ public class IntroBatchConfig {
     ItemProcessor<String, String> stringUppercaseProcessor() {
         // return new StringUpperCaseProcessor();
         return item -> {
-            if ("Juliette".equals(item)) {
+            if (failure && "Juliette".equals(item)) {
+                failure = false;
                 throw new RuntimeException("Démo exception Juliette");
             }
 
@@ -74,12 +78,12 @@ public class IntroBatchConfig {
             // .taskExecutor(new SimpleAsyncTaskExecutor())
 
             // Configuration la tolérence aux erreurs
-            .faultTolerant()
-            .retry(RuntimeException.class)
-            .retryLimit(3)
+            // .faultTolerant()
+            // .retry(RuntimeException.class)
+            // .retryLimit(3)
 
-            .skip(RuntimeException.class)
-            .skipLimit(1)
+            // .skip(RuntimeException.class)
+            // .skipLimit(1)
 
             .listener(demoStepListener)
 
