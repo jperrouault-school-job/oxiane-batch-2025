@@ -7,6 +7,7 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -20,10 +21,10 @@ public class JobApiController {
     private Job stringJob;
    
     @GetMapping("/start")
-    public void start() throws Exception {
+    public void start(@RequestParam String prefix) throws Exception {
         JobParameters params = new JobParametersBuilder()
             .addLong("time", System.currentTimeMillis())
-            .addString("prefix", "Hello ")
+            .addString("prefix", prefix)
             .toJobParameters()
         ;
 

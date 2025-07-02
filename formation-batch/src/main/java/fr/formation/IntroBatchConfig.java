@@ -20,6 +20,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import fr.formation.listener.DemoJobListener;
 import fr.formation.listener.DemoStepListener;
+import fr.formation.validator.DemoJobValidator;
 
 @Configuration
 public class IntroBatchConfig {
@@ -91,6 +92,7 @@ public class IntroBatchConfig {
         return new JobBuilder("stringJob", jobRepository)
             .start(stringStep)
             .listener(demoJobListener)
+            .validator(new DemoJobValidator())
             .build()
         ;
     }
