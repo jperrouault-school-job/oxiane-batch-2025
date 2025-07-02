@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -22,6 +23,7 @@ import fr.formation.listener.DemoStepListener;
 @Configuration
 public class IntroBatchConfig {
     @Bean
+    @StepScope
     ItemReader<String> stringReader() {
         List<String> valeurs = List.of("Alpha", "Bravo", "Charlie", "Delta", "Echo", "Fox-trot", "Golf", "Hotel", "India", "Juliette", "Kilo", "Lima", "Mike", "Novembre", "Oscar", "Papa", "Quebec", "Romeo", "Sierra", "Tando", "Uniform", "Victor", "Whisky", "X-Ray", "Yankee", "Zoulou");
 
