@@ -28,6 +28,9 @@ public class JobApiController {
     private Job stringJob;
 
     @Autowired
+    private Job paralleleJob;
+
+    @Autowired
     private JobExplorer jobExplorer;
 
     @Autowired
@@ -42,7 +45,8 @@ public class JobApiController {
             .toJobParameters()
         ;
 
-        jobLauncher.run(stringJob, params);
+        // jobLauncher.run(stringJob, params);
+        jobLauncher.run(paralleleJob, params);
     }
 
     @GetMapping("/explore")
