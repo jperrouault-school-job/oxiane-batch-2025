@@ -1,16 +1,21 @@
 package fr.formation;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.WatchService;
+
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class FormationBatchApplication {
     public static void main(String[] args) {
         SpringApplication.run(FormationBatchApplication.class, args);
@@ -25,18 +30,33 @@ public class FormationBatchApplication {
     @Bean
     CommandLineRunner runner() {
         return (args) -> {
-            JobParameters params = new JobParametersBuilder()
-                .addLong("time", System.currentTimeMillis())
-                .toJobParameters()
-            ;
+            // JobParameters params = new JobParametersBuilder()
+            //     .addLong("time", System.currentTimeMillis())
+            //     .toJobParameters()
+            // ;
             
-            jobLauncher.run(stringJob, params);
-            
-            params = new JobParametersBuilder()
-                .addLong("time", System.currentTimeMillis())
-                .toJobParameters()
-            ;
-            jobLauncher.run(stringJob, params);
+            // jobLauncher.run(stringJob, params);
+
+            // WatchService ws = FileSystems.getDefault().newWatchService();
+
+            // Path p = Paths.get("/workspace");
+
         };
     }
+
+    // @Scheduled(fixedDelay = 2000)
+    // public void schedule() {
+    //     JobParameters params = new JobParametersBuilder()
+    //         .addLong("time", System.currentTimeMillis())
+    //         .toJobParameters()
+    //     ;
+        
+    //     try {
+    //         jobLauncher.run(stringJob, params);
+    //     }
+
+    //     catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 }
