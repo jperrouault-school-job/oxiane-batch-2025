@@ -14,6 +14,7 @@ import org.springframework.batch.item.support.IteratorItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -28,7 +29,13 @@ public class IntroBatchConfig {
     @Bean
     ItemProcessor<String, String> stringUppercaseProcessor() {
         // return new StringUpperCaseProcessor();
-        return item -> item.toUpperCase();
+        return item -> {
+            if ("Juliette".equals(item)) {
+                throw new RuntimeException("Démo exception Juliette");
+            }
+
+            return item.toUpperCase();
+        };
     }
 
     @Bean
@@ -55,6 +62,18 @@ public class IntroBatchConfig {
             .reader(stringReader)
             .processor(stringUppercaseProcessor)
             .writer(stringPrintWriter)
+
+            // Multi-threading : les chunks vont être dans des threads différents
+            .taskExecutor(new SimpleAsyncTaskExecutor())
+
+            // Configuration la tolérence aux erreurs
+            .faultTolerant()
+            .retry(RuntimeException.class)
+            .retryLimit(3)
+
+            .skip(RuntimeException.class)
+            .skipLimit(1)
+
             .build()
         ;
     }
