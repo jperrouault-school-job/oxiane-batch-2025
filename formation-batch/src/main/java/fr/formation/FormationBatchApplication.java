@@ -3,6 +3,9 @@ package fr.formation;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
 import org.springframework.batch.core.Job;
@@ -37,10 +40,33 @@ public class FormationBatchApplication {
             
             // jobLauncher.run(stringJob, params);
 
-            // WatchService ws = FileSystems.getDefault().newWatchService();
+            WatchService ws = FileSystems.getDefault().newWatchService();
 
-            // Path p = Paths.get("/workspace");
+            Path p = Paths.get("/workspace");
 
+            p.register(ws, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY);
+
+            while (true) {
+                WatchKey key = ws.take();
+
+                for (WatchEvent<?> event : key.pollEvents()) {
+                    System.out.println("Evènement = " + event.kind() + ", fichier affecté = " + event.context() + ".");
+                    
+                    // JobParameters params = new JobParametersBuilder()
+                    //     .addLong("time", System.currentTimeMillis())
+                    //     .toJobParameters()
+                    // ;
+                    
+                    // jobLauncher.run(stringJob, params);
+                }
+
+                boolean valid = key.reset();
+                
+                if (!valid) {
+                    System.out.println("Clé de surveillance invalide, arrêt.");
+                    break;
+                }
+            }
         };
     }
 
