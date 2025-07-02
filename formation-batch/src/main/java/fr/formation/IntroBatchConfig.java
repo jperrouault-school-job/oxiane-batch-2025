@@ -8,6 +8,8 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
+import org.springframework.batch.core.job.flow.FlowExecutionStatus;
+import org.springframework.batch.core.job.flow.JobExecutionDecider;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -106,6 +108,7 @@ public class IntroBatchConfig {
             .reader(stringReader)
             .processor(stringUppercaseProcessor)
             .writer(stringPrintWriter)
+            // .writer(item -> {})
 
             // Multi-threading : les chunks vont être dans des threads différents
             // .taskExecutor(new SimpleAsyncTaskExecutor())
@@ -125,17 +128,33 @@ public class IntroBatchConfig {
     }
 
     @Bean
-    Flow stringFlow(Step stringStep, Step demoTaskletStep, Step demoTaskletStep2) {
+    JobExecutionDecider demoDecider() {
+        return (jobExecution, stepExecution) -> {
+            String prefix = jobExecution.getJobParameters().getString("prefix");
+
+            if (prefix.startsWith("Hello")) {
+                return new FlowExecutionStatus("LE_STATUS");
+            }
+            
+            return new FlowExecutionStatus("LE_STATUS_2");
+        };
+    }
+
+    @Bean
+    Flow stringFlow(Step stringStep, Step demoTaskletStep, Step demoTaskletStep2, JobExecutionDecider demoDecider) {
         return new FlowBuilder<Flow>("stringFlow")
             .start(stringStep)
-                .on("FAILED").to(demoTaskletStep)
+                .on("FAILED").to(demoDecider)
+                    .from(demoDecider).on("LE_STATUS").to(demoTaskletStep)
+                    .from(demoDecider).on("*").to(demoTaskletStep2)
+
                 .from(stringStep).on("*").to(demoTaskletStep2)
             .build()
         ;
     }
 
     @Bean
-    Job stringJob(Flow stringFlow, DemoJobListener demoJobListener) {
+    Job stringJob(Flow stringFlow, DemoJobListener demoJobListener, Step stringStep, Step demoTaskletStep, Step demoTaskletStep2) {
         return new JobBuilder("stringJob", jobRepository)
             // .start(stringStep)
             .start(stringFlow)
