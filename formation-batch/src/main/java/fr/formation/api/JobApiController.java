@@ -34,10 +34,11 @@ public class JobApiController {
     private JobOperator jobOperator;
    
     @GetMapping("/start")
-    public void start(@RequestParam String prefix) throws Exception {
+    public void start(@RequestParam String prefix, @RequestParam(required = false) String write) throws Exception {
         JobParameters params = new JobParametersBuilder()
             .addLong("time", System.currentTimeMillis())
             .addString("prefix", prefix)
+            .addString("writeCsv", write)
             .toJobParameters()
         ;
 

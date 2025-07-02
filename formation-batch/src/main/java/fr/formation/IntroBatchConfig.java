@@ -141,14 +141,14 @@ public class IntroBatchConfig {
     }
 
     @Bean
-    Flow stringFlow(Step stringStep, Step demoTaskletStep, Step demoTaskletStep2, JobExecutionDecider demoDecider) {
+    Flow stringFlow(Step stringStep, Step demoTaskletStep, Step demoTaskletStep2, JobExecutionDecider demoDecider, Flow flowToCsvOrNo) {
         return new FlowBuilder<Flow>("stringFlow")
             .start(stringStep)
                 .on("FAILED").to(demoDecider)
                     .from(demoDecider).on("LE_STATUS").to(demoTaskletStep)
                     .from(demoDecider).on("*").to(demoTaskletStep2)
 
-                .from(stringStep).on("*").to(demoTaskletStep2)
+                .from(stringStep).on("*").to(flowToCsvOrNo)
             .build()
         ;
     }
