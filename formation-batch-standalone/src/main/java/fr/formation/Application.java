@@ -10,14 +10,16 @@ public class Application {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
 
         JobLauncher jobLauncher = context.getBean(JobLauncher.class);
-        // Job paralleleJob = context.getBean(Job.class);
+        Job paralleleJob = context.getBean(Job.class);
 
-        // try {
-        //     jobLauncher.run(paralleleJob, new JobParametersBuilder().toJobParameters());
-        // }
+        try {
+            jobLauncher.run(paralleleJob, new JobParametersBuilder().toJobParameters());
+        }
         
-        // catch (Exception e) {
-        //     e.printStackTrace();
-        // }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        context.close();
     }
 }

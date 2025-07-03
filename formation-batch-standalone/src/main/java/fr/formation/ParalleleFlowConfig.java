@@ -8,15 +8,25 @@ import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class ParalleleFlowConfig {
+    @Autowired
+    private JobRepository jobRepository;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
     @Bean
-    Step step1(JobRepository jobRepository) {
+    Step step1() {
         return new StepBuilder("step1")
+            .repository(jobRepository)
+            .transactionManager(transactionManager)
             .tasklet((contribution, chunkContext) -> {
                 System.out.println("Démarrage STEP 1");
                 Thread.sleep(500);
@@ -28,8 +38,10 @@ public class ParalleleFlowConfig {
     }
     
     @Bean
-    Step step2(JobRepository jobRepository) {
+    Step step2() {
         return new StepBuilder("step2")
+            .repository(jobRepository)
+            .transactionManager(transactionManager)
             .tasklet((contribution, chunkContext) -> {
                 System.out.println("Démarrage STEP 2");
                 Thread.sleep(3_000);
@@ -41,8 +53,10 @@ public class ParalleleFlowConfig {
     }
     
     @Bean
-    Step step3(JobRepository jobRepository) {
+    Step step3() {
         return new StepBuilder("step3")
+            .repository(jobRepository)
+            .transactionManager(transactionManager)
             .tasklet((contribution, chunkContext) -> {
                 System.out.println("STEP 3 FINAL");
                 return RepeatStatus.FINISHED;
@@ -79,6 +93,7 @@ public class ParalleleFlowConfig {
     @Bean
     Job paralleleJob(Flow paralleleFlow, Step step3) {
         return new JobBuilder("paralleleJob")
+            .repository(jobRepository)
             .start(paralleleFlow)
             .next(step3)
             .end()
